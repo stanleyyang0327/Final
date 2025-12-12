@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <h1>U5MR Data Dashboard</h1>
+    <hr>
+    <h3>Database Check:</h3>
+    <button hx-get="/api/test" hx-target="#result">Load Data</button>
+    <div id="result"></div>
+</body>
+
+</html>
