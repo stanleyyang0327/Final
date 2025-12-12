@@ -11,9 +11,178 @@
 <body>
     <h1>U5MR Data Dashboard</h1>
     <hr>
-    <h3>Database Check:</h3>
-    <button hx-get="/api/test" hx-target="#result">Load Data</button>
-    <div id="result"></div>
+
+    <!-- 功能 1：國家歷史數據 -->
+    <div class="card">
+        <h3>1. Country History Report</h3>
+        <form>
+            <label>Select Country:</label>
+            <!-- HTMX 魔法：
+                 1. hx-get: 頁面載入時自動去抓國家列表 
+                 2. hx-trigger="load": 設定觸發時機為載入時
+            -->
+            <select name="country_id" hx-get="/api/countries" hx-trigger="load">
+            </select>
+
+            <!-- 按鈕：
+                 1. hx-post: 送出請求到後端 /report/1
+                 2. hx-include: 把上面那個 select 的值帶過去
+                 3. hx-target: 把回傳的表格塞進 #result1
+            -->
+            <button hx-post="/report/1" hx-include="[name='country_id']" hx-target="#result1">
+                Show Report
+            </button>
+        </form>
+        <div id="result1"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 2：次區域比較 -->
+    <div class="card">
+        <h3>2. Sub-Region Snapshot</h3>
+        <form>
+            <label>Select Sub-Region:</label>
+            <!-- 載入時抓取次區域 -->
+            <select name="subregion_id" hx-get="/api/subregions" hx-trigger="load">
+            </select>
+
+            <label>Select Year:</label>
+            <!-- 載入時抓取年份 -->
+            <select name="year" hx-get="/api/years" hx-trigger="load">
+            </select>
+
+            <!-- 按鈕：會自動抓取這個 <form> 內所有的 name 值 (subregion_id 和 year) -->
+            <button hx-post="/report/2" hx-target="#result2">
+                Show Report
+            </button>
+        </form>
+        <div id="result2"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 3：區域平均分析 -->
+    <div class="card">
+        <h3>3. Regional Analysis (Average U5MR)</h3>
+        <form>
+            <label>Select Region:</label>
+            <!-- 載入時抓取區域列表 -->
+            <select name="region_id" hx-get="/api/regions" hx-trigger="load">
+            </select>
+
+            <label>Select Year:</label>
+            <!-- 重複使用之前的年份 API -->
+            <select name="year" hx-get="/api/years" hx-trigger="load">
+            </select>
+
+            <button hx-post="/report/3" hx-target="#result3">
+                Show Report
+            </button>
+        </form>
+        <div id="result3"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 4：關鍵字搜尋 -->
+    <div class="card">
+        <h3>4. Search by Keyword (2023)</h3>
+        <form>
+            <label>Enter Keyword:</label>
+            <input type="text" name="keyword">
+            <button hx-post="/search" hx-include="[name='keyword']" hx-target="#result4">
+                Search
+            </button>
+        </form>
+        <div id="result4"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 5：新增下一年的紀錄 -->
+    <div class="card">
+        <h3>5. Add Next Year's Record</h3>
+        <form hx-post="/record/add" hx-target="#result5">
+            <label>Select Country:</label>
+            <select name="country_id" hx-get="/api/countries" hx-trigger="load" hx-target="this">
+            </select>
+
+            <label>Enter U5MR:</label>
+            <input type="number" name="u5mr">
+
+            <button type="submit">
+                Add Record
+            </button>
+        </form>
+        <div id="result5"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 6：更新資料 -->
+    <div class="card">
+        <h3>6. Update Existing Record</h3>
+        <form hx-post="/record/update" hx-target="#result6">
+            <label>Select Country:</label>
+            <select name="country_id" hx-get="/api/countries" hx-trigger="load" hx-target="this">
+            </select>
+
+            <label>Select Year:</label>
+            <!-- 為了方便，我們直接用所有年份列表，若選到該國沒資料的年份，後端會回傳找不到 -->
+            <select name="year" hx-get="/api/years" hx-trigger="load" hx-target="this">
+            </select>
+
+            <label>New U5MR Value:</label>
+            <input type="number" name="u5mr" step="0.01" placeholder="e.g. 10.5" required>
+
+            <button type="submit">Update Record</button>
+        </form>
+        <div id="result6"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 7：刪除指定範圍內的紀錄 -->
+    <div class="card" style="border-color: red;">
+        <h3>7. Delete Records in a Range</h3>
+        <form>
+            <label>Select Country:</label>
+            <select name="country_id" hx-get="/api/countries" hx-trigger="load" hx-target="this">
+            </select>
+
+            <label>Select Start Year:</label>
+            <select name="start_year" hx-get="/api/years" hx-trigger="load" hx-target="this">
+            </select>
+
+            <label>Select End Year:</label>
+            <select name="end_year" hx-get="/api/years" hx-trigger="load" hx-target="this">
+            </select>
+
+            <button type="submit" hx-post="/record/delete" hx-target="#result7"
+                hx-confirm="Are you sure you want to delete these records?" hx-include="closest form">
+                Delete Records
+            </button>
+        </form>
+        <div id="result7"></div>
+    </div>
+
+    <hr>
+
+    <!-- 功能 8：自選 -->
+    <div class="card">
+        <h3>8. Top 5 Countries with Highest U5MR in a Year</h3>
+        <form>
+            <label>Select Year:</label>
+            <select name="year" hx-get="/api/years" hx-trigger="load" hx-target="this">
+            </select>
+
+            <button type="submit" hx-post="/report/8" hx-target="#result8" hx-include="closest form">
+                Show Report
+            </button>
+        </form>
+        <div id="result8"></div>
+    </div>
 </body>
 
 </html>
